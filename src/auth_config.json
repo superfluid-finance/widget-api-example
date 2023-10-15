@@ -1,4 +1,5 @@
 {
   "domain": "dev-xcawadfqj4b4af21.us.auth0.com",
-  "clientId": "1BfvVz8ezhAGbtXovmzmBGESAHfRZBID"
+  "clientId": "1BfvVz8ezhAGbtXovmzmBGESAHfRZBID",
+  "audience": "https://dev-xcawadfqj4b4af21.us.auth0.com/api/v2/"
 }
