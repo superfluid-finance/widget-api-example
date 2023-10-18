@@ -6,6 +6,7 @@ const { auth } = require("express-oauth2-jwt-bearer");
 const authConfig = require("./src/auth_config.json");
 const { ethers } = require("ethers");
 const { Framework } = require("@superfluid-finance/sdk-core");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -18,6 +19,8 @@ const myProvider= new ethers.providers.JsonRpcProvider("https://gateway.tenderly
 
 const receiverAddress = "0x5E48a37D34d93778807ef19D74E06128252BAB45";
 
+let apiKeysStore = {};
+
 if (
   !authConfig.domain ||
   !authConfig.audience ||
@@ -28,6 +31,14 @@ if (
   );
 
   process.exit();
+}
+
+function validateApiKey(req, res, next) {
+  const apiKey = req.headers["x-api-key"];
+  if (!apiKey || !apiKeysStore[apiKey]) {
+      return res.status(401).send({ message: "Invalid or missing API key" });
+  }
+  next();
 }
 
 async function getFlowInfo(userAddress) {
@@ -65,7 +76,8 @@ app.use(checkJwt);
     msg: "Your access token was successfully validated!",
   });
 });*/
-app.get("/api/external", (req, res) => {
+
+app.get("/generate", (req, res) => {
   console.log("user", req.auth.payload.sub.slice(-42));
 
   const user = req.auth.payload.sub.slice(-42);
@@ -73,8 +85,10 @@ app.get("/api/external", (req, res) => {
   (async () => {
     let flowInfo = await getFlowInfo(user);
     if (flowInfo.flowRate > 0) {
+      const newApiKey = crypto.randomBytes(20).toString('hex');
+      apiKeysStore[newApiKey] = true;
       res.send({
-        msg: "Your access token was successfully validated!",
+        msg: `Here is your API Key: ${newApiKey}`,
       });
     }
     else {
