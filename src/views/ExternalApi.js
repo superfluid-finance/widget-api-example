@@ -4,9 +4,16 @@ import Highlight from "../components/Highlight";
 import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
 import { getConfig } from "../config";
 import Loading from "../components/Loading";
+const { ethers } = require("ethers");
+const { Framework } = require("@superfluid-finance/sdk-core");
 
 export const ExternalApiComponent = () => {
   const { apiOrigin = "http://localhost:3001", audience } = getConfig();
+  const myProvider = new ethers.providers.JsonRpcProvider(
+    "https://gateway.tenderly.co/public/polygon-mumbai"
+  );
+  const receiverAddress = "0x5E48a37D34d93778807ef19D74E06128252BAB45";
+  const { user } = useAuth0();
 
   const [state, setState] = useState({
     showResult: false,
@@ -14,11 +21,35 @@ export const ExternalApiComponent = () => {
     error: null,
   });
 
-  const {
-    getAccessTokenSilently,
-    loginWithPopup,
-    getAccessTokenWithPopup,
-  } = useAuth0();
+  const [hasFlow, setHasFlow] = useState(null);
+
+  async function getFlowInfo(userAddress) {
+    const sf = await Framework.create({
+      chainId: 80001,
+      provider: myProvider,
+    });
+    const daix = await sf.loadSuperToken(
+      "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f"
+    );
+    return daix.getFlow({
+      sender: userAddress,
+      receiver: receiverAddress,
+      providerOrSigner: myProvider,
+    });
+  }
+
+  useEffect(() => {
+    async function checkFlow() {
+      // Here, you'd call getFlowInfo and check the result
+      const flowInfo = await getFlowInfo(user.nickname); // Replace "userAddress" with the actual user address
+      setHasFlow(flowInfo > 0);
+    }
+
+    checkFlow();
+  }, []);
+
+  const { getAccessTokenSilently, loginWithPopup, getAccessTokenWithPopup } =
+    useAuth0();
 
   const handleConsent = async () => {
     try {
@@ -171,14 +202,29 @@ export const ExternalApiComponent = () => {
           </Alert>
         )}
 
-        <Button
-          color="primary"
-          className="mt-5"
-          onClick={callApi}
-          disabled={!audience}
-        >
-          Ping API
-        </Button>
+        {hasFlow === null ? (
+          <Loading /> // Show a loading spinner or some placeholder while checking the flow info
+        ) : hasFlow ? (
+          <Button
+            color="primary"
+            className="mt-5"
+            onClick={callApi}
+            disabled={!audience}
+          >
+            Ping API
+          </Button>
+        ) : (
+          <Button
+            color="secondary"
+            className="mt-5"
+            onClick={() =>
+              (window.location.href =
+                "https://checkout.superfluid.finance/QmX3gjtgbwgfR3L1NQqzQqoYVsHXCj5AG59dEh9NpWSepd")
+            }
+          >
+            Subscribe
+          </Button>
+        )}
       </div>
 
       <div className="result-block-container">
