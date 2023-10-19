@@ -113,9 +113,9 @@ export const ExternalApiComponent = () => {
           </Alert>
         )}
 
-        <h1>External API</h1>
+        <h1>Generate your API Key</h1>
         <p className="lead">
-          Ping an external API by clicking the button below.
+          Generate your API Key by clicking the button below.
         </p>
 
         <p>
