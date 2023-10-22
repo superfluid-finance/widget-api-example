@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { NavLink as RouterNavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import logo from "../assets/logo2.svg";
 
 import {
   Collapse,
@@ -22,26 +23,28 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const {
-    user,
-    isAuthenticated,
-    loginWithRedirect,
-    logout,
-  } = useAuth0();
+  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
   const toggle = () => setIsOpen(!isOpen);
 
   const logoutWithRedirect = () =>
     logout({
-        logoutParams: {
-          returnTo: window.location.origin,
-        }
+      logoutParams: {
+        returnTo: window.location.origin,
+      },
     });
 
   return (
     <div className="nav-container">
       <Navbar color="light" light expand="md" container={false}>
         <Container>
-          <NavbarBrand className="logo" />
+          <NavbarBrand>
+            <img
+              className="mb-3 app-logo"
+              src={logo}
+              alt="React logo"
+              width="100"
+            />
+          </NavbarBrand>
           <NavbarToggler onClick={toggle} />
           <Collapse isOpen={isOpen} navbar>
             <Nav className="mr-auto" navbar>
@@ -63,7 +66,19 @@ const NavBar = () => {
                     exact
                     activeClassName="router-link-exact-active"
                   >
-                    External API
+                    Generate Key
+                  </NavLink>
+                </NavItem>
+              )}
+              {isAuthenticated && (
+                <NavItem>
+                  <NavLink
+                    tag={RouterNavLink}
+                    to="/query-api"
+                    exact
+                    activeClassName="router-link-exact-active"
+                  >
+                    Query API
                   </NavLink>
                 </NavItem>
               )}

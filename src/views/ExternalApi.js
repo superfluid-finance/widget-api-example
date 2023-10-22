@@ -40,9 +40,9 @@ export const ExternalApiComponent = () => {
 
   useEffect(() => {
     async function checkFlow() {
-      // Here, you'd call getFlowInfo and check the result
-      const flowInfo = await getFlowInfo(user.nickname); // Replace "userAddress" with the actual user address
-      setHasFlow(flowInfo > 0);
+      const flowInfo = await getFlowInfo(user.nickname);
+      console.log(flowInfo);
+      setHasFlow(flowInfo.flowRate > 0);
     }
 
     checkFlow();
@@ -144,16 +144,16 @@ export const ExternalApiComponent = () => {
           </Alert>
         )}
 
-        <h1>Generate your API Key</h1>
+        <h1>Get Your Superfluid Subgraph API Key</h1>
         <p className="lead">
-          Generate your API Key by clicking the button below.
+          Click the button below to obtain your unique API Key.
         </p>
 
         <p>
-          This will call a local API on port 3001 that would have been started
-          if you run <code>npm run dev</code>. An access token is sent as part
-          of the request's `Authorization` header and the API will validate it
-          using the API's audience value.
+          By obtaining this API Key, you'll gain access to query data directly
+          from the Superfluid Subgraph. This service is protected and gated by
+          Superfluid's subscription widget. To maintain access to the data,
+          ensure you have an active subscription with Superfluid.
         </p>
 
         {!audience && (
@@ -211,19 +211,33 @@ export const ExternalApiComponent = () => {
             onClick={callApi}
             disabled={!audience}
           >
-            Ping API
+            Generate Key
           </Button>
         ) : (
-          <Button
-            color="secondary"
-            className="mt-5"
-            onClick={() =>
-              (window.location.href =
-                "https://checkout.superfluid.finance/QmX3gjtgbwgfR3L1NQqzQqoYVsHXCj5AG59dEh9NpWSepd")
-            }
-          >
-            Subscribe
-          </Button>
+          <>
+            <p
+              style={{
+                color: "#FF7373",
+                fontStyle: "italic",
+                fontWeight: "bold",
+              }}
+            >
+              It seems like you don't have a valid subscription for our API.
+              Please subscribe to our API to gain access to the data.
+            </p>
+            <Button
+              color="success"
+              className="mt-5"
+              onClick={() =>
+                window.open(
+                  "https://checkout.superfluid.finance/QmX3gjtgbwgfR3L1NQqzQqoYVsHXCj5AG59dEh9NpWSepd",
+                  "_blank"
+                )
+              }
+            >
+              Subscribe
+            </Button>
+          </>
         )}
       </div>
 
