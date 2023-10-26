@@ -16,14 +16,22 @@ const app = express();
 const port = process.env.API_PORT || 3001;
 const appPort = process.env.SERVER_PORT || 3000;
 const appOrigin = authConfig.appOrigin || `http://localhost:${appPort}`;
-const myProvider = new ethers.providers.JsonRpcProvider("https://gateway.tenderly.co/public/polygon-mumbai");
-const receiverAddress = "0x5E48a37D34d93778807ef19D74E06128252BAB45";
+const myProvider = new ethers.providers.JsonRpcProvider(
+  process.env.RPC_PROVIDER || "https://polygon-testnet.public.blastapi.io"
+);
+const receiverAddress = process.env.RECEIVER_ADDRESS || "0x0000000000000000000000000000000000000001";
 
 // -------------------------- INITIALIZATION --------------------------
 
 // If essential configurations are missing, exit.
-if (!authConfig.domain || !authConfig.audience || authConfig.audience === "YOUR_API_IDENTIFIER") {
-  console.log("Exiting: Please make sure that auth_config.json is in place and populated with valid domain and audience values");
+if (
+  !authConfig.domain ||
+  !authConfig.audience ||
+  authConfig.audience === "YOUR_API_IDENTIFIER"
+) {
+  console.log(
+    "Exiting: Please make sure that auth_config.json is in place and populated with valid domain and audience values"
+  );
   process.exit();
 }
 
@@ -39,6 +47,8 @@ const checkJwt = auth({
   issuerBaseURL: `https://${authConfig.domain}/`,
   algorithms: ["RS256"],
 });
+
+
 
 // -------------------------- FUNCTIONS --------------------------
 
@@ -57,7 +67,9 @@ async function getFlowInfo(userAddress) {
     chainId: 80001,
     provider: myProvider,
   });
-  const daix = await sf.loadSuperToken("0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f");
+  const daix = await sf.loadSuperToken(
+    "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f"
+  );
   return daix.getFlow({
     sender: userAddress,
     receiver: receiverAddress,
@@ -103,10 +115,10 @@ async function handleFetchFromTheGraph(req, res) {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-        }
+        },
       }
     );
-    
+
     res.send(response.data);
   } catch (error) {
     console.error("Error fetching from TheGraph:", error);

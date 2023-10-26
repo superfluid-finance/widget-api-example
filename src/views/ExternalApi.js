@@ -7,13 +7,22 @@ import Loading from "../components/Loading";
 const { ethers } = require("ethers");
 const { Framework } = require("@superfluid-finance/sdk-core");
 
+// -------------------------- CONFIGURATION --------------------------
+
+const { apiOrigin = "http://localhost:3001", audience } = getConfig();
+const myProvider = new ethers.providers.JsonRpcProvider(
+  process.env.RPC_PROVIDER || "https://polygon-testnet.public.blastapi.io"
+);
+const receiverAddress = process.env.RECEIVER_ADDRESS || "0x0000000000000000000000000000000000000001";
+
+// -------------------------- MAIN COMPONENT --------------------------
+
 export const ExternalApiComponent = () => {
-  const { apiOrigin = "http://localhost:3001", audience } = getConfig();
-  const myProvider = new ethers.providers.JsonRpcProvider(
-    "https://gateway.tenderly.co/public/polygon-mumbai"
-  );
-  const receiverAddress = "0x5E48a37D34d93778807ef19D74E06128252BAB45";
   const { user } = useAuth0();
+  const { getAccessTokenSilently, loginWithPopup, getAccessTokenWithPopup } =
+    useAuth0();
+
+  // -------------------------- DATA STORE --------------------------
 
   const [state, setState] = useState({
     showResult: false,
@@ -22,6 +31,8 @@ export const ExternalApiComponent = () => {
   });
 
   const [hasFlow, setHasFlow] = useState(null);
+
+  // -------------------------- SUPERFLUID FUNCTIONS --------------------------
 
   async function getFlowInfo(userAddress) {
     const sf = await Framework.create({
@@ -41,49 +52,13 @@ export const ExternalApiComponent = () => {
   useEffect(() => {
     async function checkFlow() {
       const flowInfo = await getFlowInfo(user.nickname);
-      console.log(flowInfo);
       setHasFlow(flowInfo.flowRate > 0);
     }
 
     checkFlow();
   }, []);
 
-  const { getAccessTokenSilently, loginWithPopup, getAccessTokenWithPopup } =
-    useAuth0();
-
-  const handleConsent = async () => {
-    try {
-      await getAccessTokenWithPopup();
-      setState({
-        ...state,
-        error: null,
-      });
-    } catch (error) {
-      setState({
-        ...state,
-        error: error.error,
-      });
-    }
-
-    await callApi();
-  };
-
-  const handleLoginAgain = async () => {
-    try {
-      await loginWithPopup();
-      setState({
-        ...state,
-        error: null,
-      });
-    } catch (error) {
-      setState({
-        ...state,
-        error: error.error,
-      });
-    }
-
-    await callApi();
-  };
+  // -------------------------- API CALL FUNCTIONS --------------------------
 
   const callApi = async () => {
     try {
@@ -96,7 +71,6 @@ export const ExternalApiComponent = () => {
       });
 
       const responseData = await response.json();
-
       setState({
         ...state,
         showResult: true,
@@ -115,6 +89,27 @@ export const ExternalApiComponent = () => {
     fn();
   };
 
+  const handleConsent = async () => {
+    try {
+      await getAccessTokenWithPopup();
+      setState({ ...state, error: null });
+    } catch (error) {
+      setState({ ...state, error: error.error });
+    }
+    await callApi();
+  };
+
+  const handleLoginAgain = async () => {
+    try {
+      await loginWithPopup();
+      setState({ ...state, error: null });
+    } catch (error) {
+      setState({ ...state, error: error.error });
+    }
+    await callApi();
+  };
+
+  // -------------------------- COMPONENT RENDER --------------------------
   return (
     <>
       <div className="mb-5">
@@ -229,10 +224,8 @@ export const ExternalApiComponent = () => {
               color="success"
               className="mt-5"
               onClick={() =>
-                window.open(
-                  "https://checkout.superfluid.finance/QmX3gjtgbwgfR3L1NQqzQqoYVsHXCj5AG59dEh9NpWSepd",
-                  "_blank"
-                )
+                (window.location.href =
+                  "https://checkout.superfluid.finance/QmZNVHW11wjjkSnC5uRd3PnxHLEpRjFxzP9Q2CoewjjP42")
               }
             >
               Subscribe
