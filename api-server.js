@@ -52,6 +52,17 @@ const checkJwt = auth({
 
 // -------------------------- FUNCTIONS --------------------------
 
+//Simple Hash function to generate deterministic API key
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0, len = str.length; i < len; i++) {
+      let chr = str.charCodeAt(i);
+      hash = (hash << 5) - hash + chr;
+      hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+}
+
 // Validates API key in request headers.
 function validateApiKey(req, res, next) {
   const apiKey = req.headers["x-api-key"];
@@ -89,7 +100,7 @@ async function handleGenerateAPIKey(req, res) {
   const flowInfo = await getFlowInfo(user);
 
   if (flowInfo.flowRate > 0) {
-    const newApiKey = crypto.randomBytes(20).toString("hex");
+    const newApiKey = hashCode(user).toString();
     apiKeysStore[newApiKey] = true;
     res.send({ msg: `Here is your API Key: ${newApiKey}` });
   } else {
