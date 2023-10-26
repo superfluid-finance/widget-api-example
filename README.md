@@ -41,8 +41,4 @@ This will start the app on port 3000 and the server on port 3001.
 
 ## Usage
 
-Once set up and running, users can sign in using Ethereum through Auth0. After authentication, they can access the Superfluid Subgraph, provided they are subscribed using the Superfluid Subscription link provided.
-
-## Conclusion
-
-This project elegantly combines the robust authentication of Auth0 with the power of Superfluid to offer a seamless and secure way to gate the Superfluid Subgraph. It provides developers with a flexible, customizable, and powerful solution for their dApps and other projects.
+Once set up and running, users can sign in using Ethereum through Auth0. After authentication, they can access Subscribe using the link which will give them access to an API key allowing them to query the Mumbai SubGraph.
