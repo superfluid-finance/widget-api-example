@@ -12,17 +12,29 @@ import {
 import Highlight from "../components/Highlight";
 
 const API_URL = "http://localhost:3001/api/mumbai";
+const defaultQuery = `
+query MyQuery {
+  account(id: "INSERT_SENDER_ADDRESS_HERE") {
+    outflows(where: {receiver: "INSERT_RECEIVER_ADDRESS_HERE"}) {
+      currentFlowRate
+    }
+  }
+}`;
 
 function FetchDataFromTheGraph() {
   const [state, setState] = useState({
     apiKey: "",
-    query: "",
+    query: defaultQuery,
     apiMessage: null,
     showResult: false,
   });
 
   const fetchData = async () => {
     try {
+      setState((prevState) => ({
+        ...prevState,
+        showResult: false,
+      }));
       const headers = {
         "Content-Type": "application/json",
         "x-api-key": state.apiKey,
